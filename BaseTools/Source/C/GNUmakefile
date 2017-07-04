@@ -31,6 +31,9 @@ ifndef ARCH
   ifneq (,$(findstring arm,$(uname_m)))
     ARCH=ARM
   endif
+  ifneq (,$(findstring ppc,$(uname_m)))
+    ARCH=PPC
+  endif
   ifndef ARCH
     $(info Could not detected ARCH from uname results)
     $(error ARCH is not defined!)
