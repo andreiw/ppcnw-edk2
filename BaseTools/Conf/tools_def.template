@@ -4366,6 +4366,7 @@ DEFINE GCC_IA32_RC_FLAGS           = -I binary -O elf32-i386          -B i386   
 DEFINE GCC_X64_RC_FLAGS            = -I binary -O elf64-x86-64        -B i386    --rename-section .data=.hii
 DEFINE GCC_IPF_RC_FLAGS            = -I binary -O elf64-ia64-little   -B ia64    --rename-section .data=.hii
 DEFINE GCC_ARM_RC_FLAGS            = -I binary -O elf32-littlearm     -B arm     --rename-section .data=.hii
+DEFINE GCC_PPC_RC_FLAGS            = -I binary -O elf32-powerpc       -B ppc     --rename-section .data=.hii
 DEFINE GCC_AARCH64_RC_FLAGS        = -I binary -O elf64-littleaarch64 -B aarch64 --rename-section .data=.hii
 
 DEFINE GCC44_ALL_CC_FLAGS            = -g -fshort-wchar -fno-builtin -fno-strict-aliasing -Wall -Werror -Wno-array-bounds -ffunction-sections -fdata-sections -include AutoGen.h -fno-common -DSTRING_ARRAY_NAME=$(BASE_NAME)Strings
@@ -4470,6 +4471,12 @@ DEFINE GCC49_AARCH64_DLINK_FLAGS     = DEF(GCC48_AARCH64_DLINK_FLAGS)
 DEFINE GCC49_AARCH64_DLINK2_FLAGS    = DEF(GCC48_AARCH64_DLINK2_FLAGS)
 DEFINE GCC49_ARM_ASLDLINK_FLAGS      = DEF(GCC48_ARM_ASLDLINK_FLAGS)
 DEFINE GCC49_AARCH64_ASLDLINK_FLAGS  = DEF(GCC48_AARCH64_ASLDLINK_FLAGS)
+
+DEFINE GCC49_PPC_ASM_FLAGS           = $(ARCHASM_FLAGS) $(PLATFORM_FLAGS) DEF(GCC_ASM_FLAGS)
+DEFINE GCC49_PPC_CC_FLAGS            = $(ARCHCC_FLAGS) $(PLATFORM_FLAGS) DEF(GCC_ALL_CC_FLAGS) -fno-short-enums -save-temps -fverbose-asm -fsigned-char -fomit-frame-pointer  -ffunction-sections -fdata-sections -fno-builtin -Wno-address -fno-asynchronous-unwind-tables -fno-stack-protector -mno-multiple -mno-pointers-to-nested-functions -mno-strict-align -msoft-float -g -fshort-wchar -fno-strict-aliasing -Wall -Werror -Wno-array-bounds -include AutoGen.h -DSTRING_ARRAY_NAME=$(BASE_NAME)Strings
+DEFINE GCC49_PPC_DLINK_FLAGS       = -pie -nostdlib -Wl,--gc-sections -u $(IMAGE_ENTRY_POINT) -Wl,-e,$(IMAGE_ENTRY_POINT) -Wl,-Map,$(DEST_DIR_DEBUG)/$(BASE_NAME).map -z common-page-size=0x20
+DEFINE GCC49_PPC_DLINK2_FLAGS      = DEF(GCC_DLINK2_FLAGS_COMMON) -Wl,--defsym=PECOFF_HEADER_SIZE=0x220
+DEFINE GCC49_PPC_ASLDLINK_FLAGS    = DEF(GCC49_PPC_DLINK_FLAGS) -Wl,--entry,ReferenceAcpiTable -u $(IMAGE_ENTRY_POINT)
 
 DEFINE GCC5_IA32_CC_FLAGS            = DEF(GCC49_IA32_CC_FLAGS)
 DEFINE GCC5_X64_CC_FLAGS             = DEF(GCC49_X64_CC_FLAGS)
@@ -5259,6 +5266,36 @@ RELEASE_GCC49_AARCH64_DLINK_FLAGS  = DEF(GCC49_AARCH64_DLINK_FLAGS)
   NOOPT_GCC49_AARCH64_CC_FLAGS     = DEF(GCC49_AARCH64_CC_FLAGS) -O0 -mcmodel=small
   NOOPT_GCC49_AARCH64_DLINK_FLAGS  = DEF(GCC49_AARCH64_DLINK_FLAGS) -z common-page-size=0x1000 -O0
   NOOPT_GCC49_AARCH64_DLINK_XIPFLAGS = -z common-page-size=0x20 -O0
+
+##################
+# GCC49 PPC definitions
+##################
+*_GCC49_PPC_CC_PATH          = ENV(GCC49_PPC_PREFIX)gcc
+*_GCC49_PPC_SLINK_PATH       = ENV(GCC49_PPC_PREFIX)gcc-ar
+*_GCC49_PPC_DLINK_PATH       = ENV(GCC49_PPC_PREFIX)gcc
+*_GCC49_PPC_ASLDLINK_PATH    = ENV(GCC49_PPC_PREFIX)gcc
+*_GCC49_PPC_ASM_PATH         = ENV(GCC49_PPC_PREFIX)gcc
+*_GCC49_PPC_PP_PATH          = ENV(GCC49_PPC_PREFIX)gcc
+*_GCC49_PPC_VFRPP_PATH       = ENV(GCC49_PPC_PREFIX)gcc
+*_GCC49_PPC_ASLCC_PATH       = ENV(GCC49_PPC_PREFIX)gcc
+*_GCC49_PPC_ASLPP_PATH       = ENV(GCC49_PPC_PREFIX)gcc
+*_GCC49_PPC_RC_PATH          = ENV(GCC49_PPC_PREFIX)objcopy
+*_GCC49_PPC_OBJCOPY_PATH     = ENV(GCC49_PPC_PREFIX)objcopy
+
+*_GCC49_PPC_ASLCC_FLAGS      = DEF(GCC_ASLCC_FLAGS)
+*_GCC49_PPC_ASLDLINK_FLAGS   = DEF(GCC49_PPC_ASLDLINK_FLAGS)
+*_GCC49_PPC_ASM_FLAGS        = DEF(GCC49_PPC_ASM_FLAGS)
+*_GCC49_PPC_DLINK_FLAGS      = DEF(GCC49_PPC_DLINK_FLAGS)
+*_GCC49_PPC_DLINK2_FLAGS     = DEF(GCC49_PPC_DLINK2_FLAGS)
+*_GCC49_PPC_PLATFORM_FLAGS   =
+*_GCC49_PPC_PP_FLAGS         = $(ARCHCC_FLAGS) $(PLATFORM_FLAGS) DEF(GCC_PP_FLAGS)
+*_GCC49_PPC_RC_FLAGS         = DEF(GCC_PPC_RC_FLAGS)
+*_GCC49_PPC_VFRPP_FLAGS      = $(ARCHCC_FLAGS) $(PLATFORM_FLAGS) DEF(GCC_VFRPP_FLAGS)
+*_GCC49_PPC_OBJCOPY_FLAGS    =
+
+  DEBUG_GCC49_PPC_CC_FLAGS   = DEF(GCC49_PPC_CC_FLAGS) -O0
+RELEASE_GCC49_PPC_CC_FLAGS   = DEF(GCC49_PPC_CC_FLAGS) -Wno-unused-but-set-variable
+  NOOPT_GCC49_PPC_CC_FLAGS   = DEF(GCC49_PPC_CC_FLAGS) -O0
 
 ####################################################################################
 #

@@ -18,3 +18,5 @@ so look at the entire commit. Each blog post will focus on the most
 important details.
 
 * [Part 1 - preparing the environment and build tools](PortingHowTo_p1.md)
+* [Part 2 - making the build system aware of the new architecture](PortingHowTo_p2.md)
+

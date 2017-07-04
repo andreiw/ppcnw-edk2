@@ -45,6 +45,9 @@
 [Includes.ARM]
   Include/Arm
 
+[Includes.PPC]
+  Include/PPC
+
 [Includes.AARCH64]
   Include/AArch64
 

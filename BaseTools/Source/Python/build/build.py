@@ -1663,8 +1663,12 @@ class Build():
                         #
                         # Check whether the set fix address is above 4G for 32bit image.
                         #
-                        if (Arch == 'IA32' or Arch == 'ARM') and self.LoadFixAddress != 0xFFFFFFFFFFFFFFFF and self.LoadFixAddress >= 0x100000000:
-                            EdkLogger.error("build", PARAMETER_INVALID, "FIX_LOAD_TOP_MEMORY_ADDRESS can't be set to larger than or equal to 4G for the platform with IA32 or ARM arch modules")
+                        if (Arch == 'IA32' or  \
+                            Arch == 'ARM' or   \
+                            Arch == 'PPC') and \
+                            self.LoadFixAddress != 0xFFFFFFFFFFFFFFFF and \
+                            self.LoadFixAddress >= 0x100000000:
+                            EdkLogger.error("build", PARAMETER_INVALID, "FIX_LOAD_TOP_MEMORY_ADDRESS can't be set to larger than or equal to 4G for the platform with IA32, PPC, ARM arch modules")
                     #
                     # Get Module List
                     #
@@ -1763,8 +1767,12 @@ class Build():
                         #
                         # Check whether the set fix address is above 4G for 32bit image.
                         #
-                        if (Arch == 'IA32' or Arch == 'ARM') and self.LoadFixAddress != 0xFFFFFFFFFFFFFFFF and self.LoadFixAddress >= 0x100000000:
-                            EdkLogger.error("build", PARAMETER_INVALID, "FIX_LOAD_TOP_MEMORY_ADDRESS can't be set to larger than or equal to 4G for the platorm with IA32 or ARM arch modules")
+                        if (Arch == 'IA32' or  \
+                            Arch == 'ARM' or   \
+                            Arch == 'PPC') and \
+                            self.LoadFixAddress != 0xFFFFFFFFFFFFFFFF and \
+                            self.LoadFixAddress >= 0x100000000:
+                            EdkLogger.error("build", PARAMETER_INVALID, "FIX_LOAD_TOP_MEMORY_ADDRESS can't be set to larger than or equal to 4G for the platorm with IA32, ARM or PPC arch modules")
                     #
                     # Get Module List
                     #
@@ -1917,8 +1925,12 @@ class Build():
                         #
                         # Check whether the set fix address is above 4G for 32bit image.
                         #
-                        if (Arch == 'IA32' or Arch == 'ARM') and self.LoadFixAddress != 0xFFFFFFFFFFFFFFFF and self.LoadFixAddress >= 0x100000000:
-                            EdkLogger.error("build", PARAMETER_INVALID, "FIX_LOAD_TOP_MEMORY_ADDRESS can't be set to larger than or equal to 4G for the platorm with IA32 or ARM arch modules")
+                        if (Arch == 'IA32' or  \
+                            Arch == 'ARM' or   \
+                            Arch == 'PPC') and \
+                            self.LoadFixAddress != 0xFFFFFFFFFFFFFFFF and \
+                            self.LoadFixAddress >= 0x100000000:
+                            EdkLogger.error("build", PARAMETER_INVALID, "FIX_LOAD_TOP_MEMORY_ADDRESS can't be set to larger than or equal to 4G for the platorm with IA32, ARM or PPC arch modules")
                     #
                     # Get Module List
                     #
@@ -2103,8 +2115,8 @@ def SingleCheckCallback(option, opt_str, value, parser):
 #
 def MyOptionParser():
     Parser = OptionParser(description=__copyright__, version=__version__, prog="build.exe", usage="%prog [options] [all|fds|genc|genmake|clean|cleanall|cleanlib|modules|libraries|run]")
-    Parser.add_option("-a", "--arch", action="append", type="choice", choices=['IA32', 'X64', 'IPF', 'EBC', 'ARM', 'AARCH64'], dest="TargetArch",
-        help="ARCHS is one of list: IA32, X64, IPF, ARM, AARCH64 or EBC, which overrides target.txt's TARGET_ARCH definition. To specify more archs, please repeat this option.")
+    Parser.add_option("-a", "--arch", action="append", type="choice", choices=['IA32', 'PPC', 'X64', 'IPF', 'EBC', 'ARM', 'AARCH64'], dest="TargetArch",
+        help="ARCHS is one of list: IA32, PPC, X64, IPF, ARM, AARCH64 or EBC, which overrides target.txt's TARGET_ARCH definition. To specify more archs, please repeat this option.")
     Parser.add_option("-p", "--platform", action="callback", type="string", dest="PlatformFile", callback=SingleCheckCallback,
         help="Build the platform specified by the DSC file name argument, overriding target.txt's ACTIVE_PLATFORM definition.")
     Parser.add_option("-m", "--module", action="callback", type="string", dest="ModuleFile", callback=SingleCheckCallback,
