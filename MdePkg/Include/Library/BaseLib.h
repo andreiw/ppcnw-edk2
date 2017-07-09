@@ -146,6 +146,40 @@ typedef struct {
 
 #endif  // defined (MDE_CPU_ARM)
 
+#if defined (MDE_CPU_PPC)
+typedef struct {
+  UINT32    SP;
+  UINT32    Toc;
+  UINT32    R13;
+  UINT32    R14;
+  UINT32    R15;
+  UINT32    R16;
+  UINT32    R17;
+  UINT32    R18;
+  UINT32    R19;
+  UINT32    R20;
+  UINT32    R21;
+  UINT32    R22;
+  UINT32    R23;
+  UINT32    R24;
+  UINT32    R25;
+  UINT32    R26;
+  UINT32    R27;
+  UINT32    R28;
+  UINT32    R29;
+  UINT32    R30;
+  UINT32    R31;
+  UINT32    LR;
+  UINT32    CR;
+  /*
+   * Don't expect to use FP.
+   */
+} BASE_LIBRARY_JUMP_BUFFER;
+
+#define BASE_LIBRARY_JUMP_BUFFER_ALIGNMENT 4
+
+#endif  // defined (MDE_CPU_PPC)
+
 #if defined (MDE_CPU_AARCH64)
 typedef struct {
   // GP regs

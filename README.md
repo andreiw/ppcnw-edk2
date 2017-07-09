@@ -19,4 +19,5 @@ important details.
 
 * [Part 1 - preparing the environment and build tools](PortingHowTo_p1.md)
 * [Part 2 - making the build system aware of the new architecture](PortingHowTo_p2.md)
+* [Part 3 - where we almost build the dummy application](PortingHowTo_p3.md)
 
