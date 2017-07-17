@@ -4473,8 +4473,8 @@ DEFINE GCC49_ARM_ASLDLINK_FLAGS      = DEF(GCC48_ARM_ASLDLINK_FLAGS)
 DEFINE GCC49_AARCH64_ASLDLINK_FLAGS  = DEF(GCC48_AARCH64_ASLDLINK_FLAGS)
 
 DEFINE GCC49_PPC_ASM_FLAGS           = $(ARCHASM_FLAGS) $(PLATFORM_FLAGS) DEF(GCC_ASM_FLAGS)
-DEFINE GCC49_PPC_CC_FLAGS            = $(ARCHCC_FLAGS) $(PLATFORM_FLAGS) DEF(GCC_ALL_CC_FLAGS) -fno-short-enums -save-temps -fverbose-asm -fsigned-char -fomit-frame-pointer  -ffunction-sections -fdata-sections -fno-builtin -Wno-address -fno-asynchronous-unwind-tables -fno-stack-protector -mno-multiple -mno-pointers-to-nested-functions -mno-strict-align -msoft-float -g -fshort-wchar -fno-strict-aliasing -Wall -Werror -Wno-array-bounds -include AutoGen.h -DSTRING_ARRAY_NAME=$(BASE_NAME)Strings
-DEFINE GCC49_PPC_DLINK_FLAGS       = -pie -nostdlib -Wl,--gc-sections -u $(IMAGE_ENTRY_POINT) -Wl,-e,$(IMAGE_ENTRY_POINT) -Wl,-Map,$(DEST_DIR_DEBUG)/$(BASE_NAME).map -z common-page-size=0x20
+DEFINE GCC49_PPC_CC_FLAGS            = $(ARCHCC_FLAGS) $(PLATFORM_FLAGS) DEF(GCC_ALL_CC_FLAGS) -fno-short-enums -save-temps -fverbose-asm -fsigned-char -fomit-frame-pointer -ffunction-sections -fdata-sections -fno-builtin -Wno-address -fno-asynchronous-unwind-tables -fno-stack-protector -mno-multiple -mno-pointers-to-nested-functions -mno-strict-align -msoft-float -g -fshort-wchar -fno-strict-aliasing -Wall -Werror -Wno-array-bounds -include AutoGen.h -DSTRING_ARRAY_NAME=$(BASE_NAME)Strings -mno-sdata -mno-toc -fpic
+DEFINE GCC49_PPC_DLINK_FLAGS       = -nostdlib -Wl,--gc-sections -u $(IMAGE_ENTRY_POINT) -Wl,-e,$(IMAGE_ENTRY_POINT) -Wl,-Map,$(DEST_DIR_DEBUG)/$(BASE_NAME).map -z common-page-size=0x20
 DEFINE GCC49_PPC_DLINK2_FLAGS      = DEF(GCC_DLINK2_FLAGS_COMMON) -Wl,--defsym=PECOFF_HEADER_SIZE=0x220
 DEFINE GCC49_PPC_ASLDLINK_FLAGS    = DEF(GCC49_PPC_DLINK_FLAGS) -Wl,--entry,ReferenceAcpiTable -u $(IMAGE_ENTRY_POINT)
 

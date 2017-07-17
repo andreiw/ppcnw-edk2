@@ -139,16 +139,30 @@ InitializeElf32 (
     Error (NULL, 0, 3000, "Unsupported", "ELF EI_DATA not ELFCLASS32");
     return FALSE;
   }
+  /*
+   * This tool is not endian safe, so can only
+   * operate on the "native" endianness for host.
+   */
+#if defined(__ORDER_BIG_ENDIAN__)
+  if (mEhdr->e_ident[EI_DATA] == ELFDATA2MSB &&
+      mEhdr->e_machine != EM_PPC) {
+   Error (NULL, 0, 3000, "Unsupported", "ELF EI_DATA not ELFDATA2MSB for PPC");
+   return FALSE;
+  }
+#else
   if (mEhdr->e_ident[EI_DATA] != ELFDATA2LSB) {
     Error (NULL, 0, 3000, "Unsupported", "ELF EI_DATA not ELFDATA2LSB");
     return FALSE;
-  }  
+  }
+#endif
   if ((mEhdr->e_type != ET_EXEC) && (mEhdr->e_type != ET_DYN)) {
     Error (NULL, 0, 3000, "Unsupported", "ELF e_type not ET_EXEC or ET_DYN");
     return FALSE;
   }
-  if (!((mEhdr->e_machine == EM_386) || (mEhdr->e_machine == EM_ARM))) { 
-    Error (NULL, 0, 3000, "Unsupported", "ELF e_machine not EM_386 or EM_ARM");
+  if (!((mEhdr->e_machine == EM_386) ||
+        (mEhdr->e_machine == EM_ARM) ||
+        (mEhdr->e_machine == EM_PPC))) {
+    Error (NULL, 0, 3000, "Unsupported", "ELF e_machine not EM_386, EM_ARM or EM_PPC");
     return FALSE;
   }
   if (mEhdr->e_version != EV_CURRENT) {
@@ -358,10 +372,11 @@ ScanSections32 (
   switch (mEhdr->e_machine) {
   case EM_386:
   case EM_ARM:
+  case EM_PPC:
     mCoffOffset += sizeof (EFI_IMAGE_NT_HEADERS32);
   break;
   default:
-    VerboseMsg ("%s unknown e_machine type. Assume IA-32", (UINTN)mEhdr->e_machine);
+    VerboseMsg ("%s unknown e_machine type %hu. Assume IA-32", mInImageName, mEhdr->e_machine);
     mCoffOffset += sizeof (EFI_IMAGE_NT_HEADERS32);
   break;
   }
@@ -551,6 +566,10 @@ ScanSections32 (
   NtHdr->Pe32.Signature = EFI_IMAGE_NT_SIGNATURE;
 
   switch (mEhdr->e_machine) {
+  case EM_PPC:
+    NtHdr->Pe32.FileHeader.Machine = EFI_IMAGE_MACHINE_POWERPC;
+    NtHdr->Pe32.OptionalHeader.Magic = EFI_IMAGE_NT_OPTIONAL_HDR32_MAGIC;
+    break;
   case EM_386:
     NtHdr->Pe32.FileHeader.Machine = EFI_IMAGE_MACHINE_IA32;
     NtHdr->Pe32.OptionalHeader.Magic = EFI_IMAGE_NT_OPTIONAL_HDR32_MAGIC;
@@ -790,6 +809,11 @@ WriteSections32 (
           default:
             Error (NULL, 0, 3000, "Invalid", "%s unsupported ELF EM_386 relocation 0x%x.", mInImageName, (unsigned) ELF_R_TYPE(Rel->r_info));
           }
+        } else if (mEhdr->e_machine == EM_PPC) {
+          switch (ELF_R_TYPE(Rel->r_info)) {
+          default:
+            Error (NULL, 0, 3000, "Invalid", "%s unsupported ELF EM_PPC relocation 0x%x.", mInImageName, (unsigned) ELF_R_TYPE(Rel->r_info));
+          }
         } else if (mEhdr->e_machine == EM_ARM) {
           switch (ELF32_R_TYPE(Rel->r_info)) {
           case R_ARM_RBASE:
@@ -916,6 +940,11 @@ WriteRelocations32 (
               break;
             default:
               Error (NULL, 0, 3000, "Invalid", "%s unsupported ELF EM_386 relocation 0x%x.", mInImageName, (unsigned) ELF_R_TYPE(Rel->r_info));
+            }
+          } else if (mEhdr->e_machine == EM_PPC) {
+            switch (ELF_R_TYPE(Rel->r_info)) {
+            default:
+              Error (NULL, 0, 3000, "Invalid", "%s unsupported ELF EM_PPC relocation 0x%x.", mInImageName, (unsigned) ELF_R_TYPE(Rel->r_info));
             }
           } else if (mEhdr->e_machine == EM_ARM) {
             switch (ELF32_R_TYPE(Rel->r_info)) {
