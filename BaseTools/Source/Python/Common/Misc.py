@@ -1910,6 +1910,7 @@ class PeImageClass():
         self.SectionAlignment  = 0
         self.SectionHeaderList = []
         self.ErrorInfo = ''
+        self.IsBE      = False
         try:
             PeObject = open(PeFile, 'rb')
         except:
@@ -1917,21 +1918,27 @@ class PeImageClass():
             return
         # Read DOS header
         ByteArray = array.array('B')
-        ByteArray.fromfile(PeObject, 0x3E)
+        ByteArray.fromfile(PeObject, 0x40)
         ByteList = ByteArray.tolist()
-        # DOS signature should be 'MZ'
-        if self._ByteListToStr (ByteList[0x0:0x2]) != 'MZ':
+        # DOS signature should be 'MZ' ('ZM' on BE).
+        if self._ByteListToStr (ByteList[0x0:0x2]) != 'MZ' and \
+           self._ByteListToStr (ByteList[0x0:0x2]) != 'ZM':
             self.ErrorInfo = self.FileName + ' has no valid DOS signature MZ'
             return
 
+        if self._ByteListToStr (ByteList[0x0:0x2]) == 'ZM':
+            self.IsBE = True
+
         # Read 4 byte PE Signature
-        PeOffset = self._ByteListToInt(ByteList[0x3C:0x3E])
+        PeOffset = self._ByteListToInt(ByteList[0x3C:0x40])
         PeObject.seek(PeOffset)
         ByteArray = array.array('B')
         ByteArray.fromfile(PeObject, 4)
+
         # PE signature should be 'PE\0\0'
-        if ByteArray.tostring() != 'PE\0\0':
-            self.ErrorInfo = self.FileName + ' has no valid PE signature PE00'
+        if (not self.IsBE and ByteArray.tostring() != 'PE\0\0') or \
+           (self.IsBE and ByteArray.tostring() != '\0\0EP'):
+            self.ErrorInfo = self.FileName + ' has no valid PE signature PE00' 
             return
 
         # Read PE file header
@@ -1975,8 +1982,12 @@ class PeImageClass():
 
     def _ByteListToInt(self, ByteList):
         Value = 0
-        for index in range(len(ByteList) - 1, -1, -1):
-            Value = (Value << 8) | int(ByteList[index])
+        if self.IsBE:
+            for index in range(0, len(ByteList), 1):
+                Value = (Value << 8) | int(ByteList[index])
+        else:
+            for index in range(len(ByteList) - 1, -1, -1):
+                Value = (Value << 8) | int(ByteList[index])
         return Value
 
 

@@ -17,58 +17,32 @@
 #define __PROCESSOR_BIND_H__
 
 //
+// Only support GCC.
+//
+#ifndef __GNUC__
+#error Unsupported compiler
+#endif
+
+//
 // Define the processor type so other code can make processor based choices
 //
 #define MDE_CPU_PPC
 
 //
-// Make sure we are useing the correct packing rules per EFI specification
+// Use ANSI C 2000 stdint.h integer width declarations
 //
-#ifndef __GNUC__
-#pragma pack()
-#endif
-
-#if !defined(__GNUC__) && (__STDC_VERSION__ < 199901L)
-  //
-  // No ANSI C 2000 stdint.h integer width declarations, so define equivalents
-  //
- 
-  //
-  // Assume standard IA-32 alignment. 
-  // BugBug: Need to check portability of long long
-  //
-  typedef unsigned long long  UINT64;
-  typedef long long           INT64;
-  typedef unsigned int        UINT32;
-  typedef int                 INT32;
-  typedef unsigned short      UINT16;
-  typedef unsigned short      CHAR16;
-  typedef short               INT16;
-  typedef unsigned char       BOOLEAN;
-  typedef unsigned char       UINT8;
-  typedef char                CHAR8;
-  typedef char                INT8;
-
-  #define UINT8_MAX 0xff
-
-#else
-  //
-  // Use ANSI C 2000 stdint.h integer width declarations
-  //
-  #include "stdint.h"
-  typedef uint8_t   BOOLEAN;
-  typedef int8_t    INT8;
-  typedef uint8_t   UINT8;
-  typedef int16_t   INT16;
-  typedef uint16_t  UINT16;
-  typedef int32_t   INT32;
-  typedef uint32_t  UINT32;
-  typedef int64_t   INT64;
-  typedef uint64_t  UINT64;
-  typedef char      CHAR8;
-  typedef uint16_t  CHAR16;
-
-#endif
+#include "stdint.h"
+typedef uint8_t   BOOLEAN;
+typedef int8_t    INT8;
+typedef uint8_t   UINT8;
+typedef int16_t   INT16;
+typedef uint16_t  UINT16;
+typedef int32_t   INT32;
+typedef uint32_t  UINT32;
+typedef int64_t   INT64;
+typedef uint64_t  UINT64;
+typedef char      CHAR8;
+typedef uint16_t  CHAR16;
 
 typedef UINT32  UINTN;
 typedef INT32   INTN;
@@ -86,6 +60,11 @@ typedef INT32   INTN;
 #define MAX_ADDRESS   0xFFFFFFFF
 
 //
+// Stack alignment.
+//
+#define CPU_STACK_ALIGNMENT 16
+
+//
 // Modifier to ensure that all protocol member functions and EFI intrinsics
 // use the correct C calling convention. All protocol member functions and
 // EFI intrinsics are required to modify their member functions with EFIAPI.
@@ -100,4 +79,30 @@ typedef INT32   INTN;
 //
 #define GLOBAL_REMOVE_IF_UNREFERENCED
 
+#define ASM_GLOBAL .global
+
+#ifndef __USER_LABEL_PREFIX__
+#define __USER_LABEL_PREFIX__
 #endif
+
+#define ASM_LABEL(a) _CONCATENATE(__USER_LABEL_PREFIX__, a)
+#define ASM_FUNC(name)                          \
+  .section .text;                               \
+  .align 2;                                     \
+  .type name,@function;                         \
+  ASM_GLOBAL ASM_LABEL(name);                   \
+ASM_LABEL(name):
+
+/**
+  Return the pointer to the first instruction of a function given a function pointer.
+  On PPC these two pointer values are the same, so the implementation of this macro
+  is very simple.
+
+  @param  FunctionPointer   A pointer to a function.
+
+  @return The pointer to the first instruction of a function given a function pointer.
+
+**/
+#define FUNCTION_ENTRY_POINT(FunctionPointer) (VOID *)(UINTN)(FunctionPointer)
+
+#endif /* __PROCESSOR_BIND_H__ */

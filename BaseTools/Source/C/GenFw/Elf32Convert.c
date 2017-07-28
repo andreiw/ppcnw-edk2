@@ -262,14 +262,32 @@ IsTextShdr (
 }
 
 STATIC
-BOOLEAN
-IsHiiRsrcShdr (
+CHAR8 *
+ShdrName (
   Elf_Shdr *Shdr
   )
 {
   Elf_Shdr *Namedr = GetShdrByIndex(mEhdr->e_shstrndx);
 
-  return (BOOLEAN) (strcmp((CHAR8*)mEhdr + Namedr->sh_offset + Shdr->sh_name, ELF_HII_SECTION_NAME) == 0);
+  return (CHAR8*)mEhdr + Namedr->sh_offset + Shdr->sh_name;
+}
+
+STATIC
+BOOLEAN
+IsGotShdr (
+  Elf_Shdr *Shdr
+  )
+{
+  return (BOOLEAN) (strcmp(ShdrName(Shdr), ELF_GOT_SECTION_NAME) == 0);
+}
+
+STATIC
+BOOLEAN
+IsHiiRsrcShdr (
+  Elf_Shdr *Shdr
+  )
+{
+  return (BOOLEAN) (strcmp(ShdrName(Shdr), ELF_HII_SECTION_NAME) == 0);
 }
 
 STATIC
@@ -290,9 +308,7 @@ IsStrtabShdr (
   Elf_Shdr *Shdr
   )
 {
-  Elf_Shdr *Namedr = GetShdrByIndex(mEhdr->e_shstrndx);
-
-  return (BOOLEAN) (strcmp((CHAR8*)mEhdr + Namedr->sh_offset + Shdr->sh_name, ELF_STRTAB_SECTION_NAME) == 0);
+  return (BOOLEAN) (strcmp(ShdrName(Shdr), ELF_STRTAB_SECTION_NAME) == 0);
 }
 
 STATIC
@@ -359,6 +375,7 @@ ScanSections32 (
   EFI_IMAGE_OPTIONAL_HEADER_UNION *NtHdr;
   UINT32                          CoffEntry;
   UINT32                          SectionCount;
+  UINT32                          GotCount;
   BOOLEAN                         FoundSection;
 
   CoffEntry = 0;
@@ -418,6 +435,7 @@ ScanSections32 (
   for (i = 0; i < mEhdr->e_shnum; i++) {
     Elf_Shdr *shdr = GetShdrByIndex(i);
     if (IsTextShdr(shdr)) {
+      fprintf(stderr, "%s is .text\n", ShdrName(shdr));
       if ((shdr->sh_addralign != 0) && (shdr->sh_addralign != 1)) {
         // the alignment field is valid
         if ((shdr->sh_addr & (shdr->sh_addralign - 1)) == 0) {
@@ -466,9 +484,11 @@ ScanSections32 (
   mDataOffset = mCoffOffset;
   FoundSection = FALSE;
   SectionCount = 0;
+  GotCount = 0;
   for (i = 0; i < mEhdr->e_shnum; i++) {
     Elf_Shdr *shdr = GetShdrByIndex(i);
     if (IsDataShdr(shdr)) {
+      fprintf(stderr, "%s is .data\n", ShdrName(shdr));
       if ((shdr->sh_addralign != 0) && (shdr->sh_addralign != 1)) {
         // the alignment field is valid
         if ((shdr->sh_addr & (shdr->sh_addralign - 1)) == 0) {
@@ -477,6 +497,10 @@ ScanSections32 (
         } else {
           Error (NULL, 0, 3000, "Invalid", "Section address not aligned to its own alignment.");
         }
+      }
+
+      if (IsGotShdr(shdr)) {
+        GotCount++;
       }
 
       //
@@ -493,7 +517,8 @@ ScanSections32 (
     }
   }
 
-  if (SectionCount > 1 && mOutImageType == FW_EFI_IMAGE) {
+  if ((SectionCount - GotCount) > 1 &&
+      mOutImageType == FW_EFI_IMAGE) {
     Warning (NULL, 0, 0, NULL, "Mulitple sections in %s are merged into 1 data section. Source level debug might not work correctly.", mInImageName);
   }
 
@@ -648,6 +673,52 @@ ScanSections32 (
 
 }
 
+Elf_Shdr *
+AddrToShdr(
+           UINT32 Addr,
+           UINT32 *ShIndex
+           )
+{
+  UINT32 Idx;
+
+  for (Idx = 0; Idx < mEhdr->e_shnum; Idx++) {
+    Elf_Shdr *Shdr = GetShdrByIndex(Idx);
+    if (Addr >= Shdr->sh_addr &&
+        Addr < (Shdr->sh_addr + Shdr->sh_size) &&
+        (IsTextShdr(Shdr) || IsDataShdr(Shdr))) {
+      *ShIndex = Idx;
+      return Shdr;
+    }
+  }
+
+  return NULL;
+}
+
+
+STATIC
+VOID
+UpdateGot (
+           UINT32 *GotStart,
+           UINT32 *GotEnd
+           )
+{
+  Elf_Shdr *Shdr;
+  UINT32 ShIndex;
+
+  for (; GotStart < GotEnd; GotStart++) {
+    Shdr = AddrToShdr(*GotStart, &ShIndex);
+    if (Shdr == NULL) {
+      continue;
+    }
+
+    fprintf(stderr, "0x%x is in %s (%u) COFF offset = 0x%x\n",
+            *GotStart, ShdrName(Shdr), ShIndex,
+            mCoffSectionsOffset[ShIndex] + *GotStart - Shdr->sh_addr);
+
+    *GotStart = mCoffSectionsOffset[ShIndex] + *GotStart - Shdr->sh_addr;
+  }
+}
+
 STATIC
 BOOLEAN
 WriteSections32 (
@@ -685,9 +756,17 @@ WriteSections32 (
       switch (Shdr->sh_type) {
       case SHT_PROGBITS:
         /* Copy.  */
+        fprintf(stderr, "copying %s\n", ShdrName(Shdr));
+
         memcpy(mCoffFile + mCoffSectionsOffset[Idx],
               (UINT8*)mEhdr + Shdr->sh_offset,
               Shdr->sh_size);
+
+        if (IsGotShdr(Shdr)) {
+          UpdateGot((UINT32 *) (mCoffFile + mCoffSectionsOffset[Idx]),
+                      (UINT32 *) (mCoffFile + mCoffSectionsOffset[Idx] +
+                                  Shdr->sh_size));
+        }
         break;
 
       case SHT_NOBITS:
@@ -895,6 +974,36 @@ UINTN gMovwOffset = 0;
 
 STATIC
 VOID
+RelocateGot (
+             Elf_Shdr *GotShdr,
+             UINT32 GotShIndex
+             )
+{
+  Elf_Shdr *Shdr;
+  UINT32 ShIndex;
+  UINT32 *GotStart = (UINT32 *) ((UINT8 *) mEhdr +
+                              GotShdr->sh_offset);
+  UINT32 *GotEnd = (UINT32 *) ((UINT8 *) mEhdr +
+                               GotShdr->sh_offset +
+                               GotShdr->sh_size);
+  UINT32 *GotIndex;
+
+  for (GotIndex = GotStart; GotIndex < GotEnd; GotIndex++) {
+    Shdr = AddrToShdr(*GotIndex, &ShIndex);
+    if (Shdr == NULL) {
+      continue;
+    }
+
+    fprintf(stderr, "0x%x is in %s (%u) COFF offset fixup for 0x%x\n",
+            *GotIndex, ShdrName(Shdr), ShIndex,
+            mCoffSectionsOffset[GotShIndex] + ((UINT32) GotIndex - (UINT32) GotStart));
+    CoffAddFixup(mCoffSectionsOffset[GotShIndex] + ((UINT32) GotIndex - (UINT32) GotStart),
+                 EFI_IMAGE_REL_BASED_HIGHLOW);
+  }
+}
+
+STATIC
+VOID
 WriteRelocations32 (
   VOID
   )
@@ -913,7 +1022,10 @@ WriteRelocations32 (
 
   for (Index = 0, FoundRelocations = FALSE; Index < mEhdr->e_shnum; Index++) {
     Elf_Shdr *RelShdr = GetShdrByIndex(Index);
-    if ((RelShdr->sh_type == SHT_REL) || (RelShdr->sh_type == SHT_RELA)) {
+
+    if (IsGotShdr(RelShdr)) {
+      RelocateGot(RelShdr, Index);
+    } else if ((RelShdr->sh_type == SHT_REL) || (RelShdr->sh_type == SHT_RELA)) {
       Elf_Shdr *SecShdr = GetShdrByIndex (RelShdr->sh_info);
       if (IsTextShdr(SecShdr) || IsDataShdr(SecShdr)) {
         UINT32 RelIdx;

@@ -832,8 +832,9 @@ Returns:
     return 0;
   }
 
-  Length  = *((UINT32 *) ThreeByteLength);
-  Length  = Length & 0x00FFFFFF;
+  Length = ThreeByteLength[2] << 16 |
+    ThreeByteLength[1] << 8 |
+    ThreeByteLength[0];
 
   return Length;
 }

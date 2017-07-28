@@ -29,7 +29,6 @@ SECTIONS {
   .text : ALIGN(CONSTANT(COMMONPAGESIZE)) {
     *(.text .text.* .stub .gnu.linkonce.t.*)
     *(.rodata .rodata.* .gnu.linkonce.r.*)
-    *(.got .got.*)
 
     /*
      * The contents of AutoGen.c files are mostly constant from the POV of the
@@ -40,6 +39,10 @@ SECTIONS {
      * emitted GUIDs here.
      */
     *:AutoGen.obj(.data.g*Guid)
+  }
+
+  .got ALIGN(ALIGNOF(.text)) : ALIGN(CONSTANT(COMMONPAGESIZE)) {
+    *(.got .got.*)
   }
 
   /*
