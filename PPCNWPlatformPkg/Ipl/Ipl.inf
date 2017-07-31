@@ -39,3 +39,14 @@
   MdeModulePkg/MdeModulePkg.dec
 
 [LibraryClasses]
+  OFWLib
+  SerialPortLib
+  BaseLib
+  PrintLib
+
+[FixedPcd]
+  gEfiMdeModulePkgTokenSpaceGuid.PcdFirmwareVersionString
+  gPPCTokenSpaceGuid.PcdFdBaseAddress
+  gPPCTokenSpaceGuid.PcdFdSize
+  gPPCTokenSpaceGuid.PcdFvBaseAddress
+  gPPCTokenSpaceGuid.PcdFvSize

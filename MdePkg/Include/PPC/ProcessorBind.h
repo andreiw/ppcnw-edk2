@@ -32,6 +32,7 @@
 // Use ANSI C 2000 stdint.h integer width declarations
 //
 #include "stdint.h"
+#include "limits.h"
 typedef uint8_t   BOOLEAN;
 typedef int8_t    INT8;
 typedef uint8_t   UINT8;
@@ -58,6 +59,12 @@ typedef INT32   INTN;
 // Maximum legal PPC address
 //
 #define MAX_ADDRESS   0xFFFFFFFF
+
+///
+/// Maximum legal INTN and UINTN values.
+///
+#define MAX_INTN   ((INTN)0x7FFFFFFF)
+#define MAX_UINTN  ((UINTN)0xFFFFFFFF)
 
 //
 // Stack alignment.

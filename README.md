@@ -22,3 +22,4 @@ important details.
 * [Part 3 - where we almost build the dummy application](PortingHowTo_p3.md)
 * [Part 4 - where we try to generate an EFI binary](PortingHowTo_p4.md)
 * [Part 5 - where we finally start writing the EFI boot code](PortingHowTo_p5.md)
+* [Part 6 - where we bring real logging to our IPL and fight endian-unsafe code](PortingHowTo_p6.md)

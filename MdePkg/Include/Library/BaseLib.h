@@ -148,8 +148,8 @@ typedef struct {
 
 #if defined (MDE_CPU_PPC)
 typedef struct {
-  UINT32    SP;
-  UINT32    Toc;
+  UINT32    R1;
+  UINT32    R2;
   UINT32    R13;
   UINT32    R14;
   UINT32    R15;

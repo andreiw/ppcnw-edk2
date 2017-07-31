@@ -11,6 +11,7 @@
 //
 
 #include <AsmMacroLib.h>
+#include <Pcr.h>
 
 .text
         .p2align 4
@@ -18,10 +19,27 @@ stack:
         .fill 4096
 stack_top:
 
+pcr:
+        .fill 4096
+
+//
+// Enter here with r5 = OF CIF entry.
+//
 ASM_FUNC(_ModuleEntryPoint)
-        bl 1f
-1:      mflr r1
-        addi r1, r1, (stack_top - 1b)
-        addi r1,r1,-16
-        bl CEntryPoint
-        b .
+        //
+        // Setup stack.
+        //
+        bl      1f
+1:      mflr    r3
+        addi    r1, r3, (stack_top - 1b)
+        addi    r1,r1,-16
+        //
+        // Setup PCR and save OF CIF.
+        //
+        addi    r2, r3, (pcr - 1b)
+        stw     r5, PCR(OFEntry)
+        //
+        // Go C: r5 = OF CIF.
+        //
+        bl      CEntryPoint
+        b       .

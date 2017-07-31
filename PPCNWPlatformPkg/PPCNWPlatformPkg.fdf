@@ -52,7 +52,7 @@ NumBlocks     = 0x500
 0x00000000|0x00001000
 FILE = $(OUTPUT_DIRECTORY)/$(TARGET)_$(TOOL_CHAIN_TAG)/$(ARCH)/FDLoader.efi
 
-0x00001000|0x004fe000
+0x00001000|0x004ff000
 gPPCTokenSpaceGuid.PcdFvBaseAddress|gPPCTokenSpaceGuid.PcdFvSize
 FV = FVMAIN
 

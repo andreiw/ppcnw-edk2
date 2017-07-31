@@ -1,0 +1,34 @@
+#/** @file
+#
+# PowerPC BE on NewWorld platforms.
+#
+# Copyright (c) 2017, Andrei Warkentin <andrey.warkentin@gmail.com>
+#
+#  This program and the accompanying materials
+#  are licensed and made available under the terms and conditions of the BSD License
+#  which accompanies this distribution.  The full text of the license may be found at
+#  http://opensource.org/licenses/bsd-license.php
+#
+#  THE PROGRAM IS DISTRIBUTED UNDER THE BSD LICENSE ON AN "AS IS" BASIS,
+#  WITHOUT WARRANTIES OR REPRESENTATIONS OF ANY KIND, EITHER EXPRESS OR IMPLIED.
+#
+#**/
+
+[Defines]
+  INF_VERSION                    = 0x00010005
+  BASE_NAME                      = OFWLib
+  FILE_GUID                      = 82da1b44-d2d6-4a7d-bbf0-a0cb67964034
+  MODULE_TYPE                    = BASE
+  VERSION_STRING                 = 1.0
+  LIBRARY_CLASS                  = OFWLib
+
+[Sources]
+  OFWLib.c
+
+[Packages]
+  PPCNWPlatformPkg/PPCNWPlatformPkg.dec
+  MdePkg/MdePkg.dec
+
+[LibraryClasses]
+
+[Pcd]

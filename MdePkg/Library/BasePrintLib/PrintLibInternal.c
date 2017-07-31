@@ -75,6 +75,24 @@ GLOBAL_REMOVE_IF_UNREFERENCED CONST CHAR8 * CONST mStatusString[] = {
   "Compromised Data"              //  RETURN_COMPROMISED_DATA       = 33 | MAX_BIT
 };
 
+STATIC inline UINTN
+NextCharacter(
+              IN CONST CHAR8 *Buffer,
+              IN INTN BytesPerCharacter)
+{
+  UINTN Character;
+#if defined(__ORDER_BIG_ENDIAN__)
+  if (BytesPerCharacter == 1 || BytesPerCharacter == -1) {
+    Character = *Buffer;
+  } else {
+    Character = ((*Buffer << 8) | (*(Buffer + 1)));
+  }
+#else
+  Character = (*Buffer | ((BytesPerCharacter == 1 || BytesPerCharacter == -1) ? 0 : (*(Buffer + 1) << 8)));
+#endif
+
+  return Character;
+}
 
 /**
   Internal function that places the character into the Buffer.
@@ -104,10 +122,19 @@ BasePrintLibFillBuffer (
   INTN  Index;
   
   for (Index = 0; Index < Length && Buffer < EndBuffer; Index++) {
+#if defined (__ORDER_BIG_ENDIAN__)
+    if (Increment == 1) {
+      *Buffer = (CHAR8) Character;
+    } else {
+      *Buffer = (CHAR8)(Character >> 8);
+      *(Buffer + 1) = (CHAR8) Character;
+    }
+#else
     *Buffer = (CHAR8) Character;
     if (Increment != 1) {
       *(Buffer + 1) = (CHAR8)(Character >> 8);
     }
+#endif
     Buffer += Increment;
   }
 
@@ -653,7 +680,7 @@ BasePrintLibSPrintMarker (
   //
   // Get the first character from the format string
   //
-  FormatCharacter = ((*Format & 0xff) | ((BytesPerFormatCharacter == 1) ? 0 : (*(Format + 1) << 8))) & FormatMask;
+  FormatCharacter = NextCharacter(Format, BytesPerFormatCharacter) & FormatMask;
 
   //
   // Loop until the end of the format string is reached or the output buffer is full
@@ -685,7 +712,7 @@ BasePrintLibSPrintMarker (
       //
       for (Done = FALSE; !Done; ) {
         Format += BytesPerFormatCharacter;
-        FormatCharacter = ((*Format & 0xff) | ((BytesPerFormatCharacter == 1) ? 0 : (*(Format + 1) << 8))) & FormatMask;
+        FormatCharacter = NextCharacter(Format, BytesPerFormatCharacter) & FormatMask;
         switch (FormatCharacter) {
         case '.': 
           Flags |= PRECISION; 
@@ -738,7 +765,7 @@ BasePrintLibSPrintMarker (
           for (Count = 0; ((FormatCharacter >= '0') &&  (FormatCharacter <= '9')); ){
             Count = (Count * 10) + FormatCharacter - '0';
             Format += BytesPerFormatCharacter;
-            FormatCharacter = ((*Format & 0xff) | ((BytesPerFormatCharacter == 1) ? 0 : (*(Format + 1) << 8))) & FormatMask;
+            FormatCharacter = NextCharacter(Format, BytesPerFormatCharacter) & FormatMask;
           }
           Format -= BytesPerFormatCharacter;
           if ((Flags & PRECISION) == 0) {
@@ -928,6 +955,9 @@ BasePrintLibSPrintMarker (
         } else {
           Character = BASE_ARG (BaseListMarker, UINTN) & 0xffff;
         }
+#if defined (__ORDER_BIG_ENDIAN__)
+        Character <<= ((sizeof(Character) / 2) - 1) * (8 * 2);
+#endif
         ArgumentString = (CHAR8 *)&Character;
         Flags |= ARGUMENT_UNICODE;
         break;
@@ -1017,7 +1047,7 @@ BasePrintLibSPrintMarker (
 
       case '\r':
         Format += BytesPerFormatCharacter;
-        FormatCharacter = ((*Format & 0xff) | ((BytesPerFormatCharacter == 1) ? 0 : (*(Format + 1) << 8))) & FormatMask;
+        FormatCharacter = NextCharacter(Format, BytesPerFormatCharacter) & FormatMask;
         if (FormatCharacter == '\n') {
           //
           // Translate '\r\n' to '\r\n'
@@ -1038,7 +1068,7 @@ BasePrintLibSPrintMarker (
         //
         ArgumentString = "\r\n";
         Format += BytesPerFormatCharacter;
-        FormatCharacter = ((*Format & 0xff) | ((BytesPerFormatCharacter == 1) ? 0 : (*(Format + 1) << 8))) & FormatMask;
+        FormatCharacter = NextCharacter(Format, BytesPerFormatCharacter) & FormatMask;
         if (FormatCharacter != '\r') {
           Format   -= BytesPerFormatCharacter;
         }
@@ -1049,15 +1079,20 @@ BasePrintLibSPrintMarker (
         //
         // if the type is '%' or unknown, then print it to the screen
         //
+#if defined (__ORDER_BIG_ENDIAN__)
+        FormatCharacter <<= ((sizeof(FormatCharacter) / BytesPerFormatCharacter) - 1) * (8 * BytesPerFormatCharacter);
+#endif
+        if (Flags & FORMAT_UNICODE) {
+          Flags |= ARGUMENT_UNICODE;
+        }
         ArgumentString = (CHAR8 *)&FormatCharacter;
-        Flags |= ARGUMENT_UNICODE;
         break;
       }
       break;
  
     case '\r':
       Format += BytesPerFormatCharacter;
-      FormatCharacter = ((*Format & 0xff) | ((BytesPerFormatCharacter == 1) ? 0 : (*(Format + 1) << 8))) & FormatMask;
+      FormatCharacter = NextCharacter(Format, BytesPerFormatCharacter) & FormatMask;
       if (FormatCharacter == '\n') {
         //
         // Translate '\r\n' to '\r\n'
@@ -1078,15 +1113,20 @@ BasePrintLibSPrintMarker (
       //
       ArgumentString = "\r\n";
       Format += BytesPerFormatCharacter;
-      FormatCharacter = ((*Format & 0xff) | ((BytesPerFormatCharacter == 1) ? 0 : (*(Format + 1) << 8))) & FormatMask;
+      FormatCharacter = NextCharacter(Format, BytesPerFormatCharacter) & FormatMask;
       if (FormatCharacter != '\r') {
         Format   -= BytesPerFormatCharacter;
       }
       break;
 
     default:
+#if defined (__ORDER_BIG_ENDIAN__)
+      FormatCharacter <<= ((sizeof(FormatCharacter) / BytesPerFormatCharacter) - 1) * (8 * BytesPerFormatCharacter);
+#endif
+      if (Flags & FORMAT_UNICODE) {
+        Flags |= ARGUMENT_UNICODE;
+      }
       ArgumentString = (CHAR8 *)&FormatCharacter;
-      Flags |= ARGUMENT_UNICODE;
       break;
     }
 
@@ -1108,7 +1148,8 @@ BasePrintLibSPrintMarker (
       // ArgumentString is either null-terminated, or it contains Precision characters
       //
       for (Count = 0; Count < Precision || ((Flags & PRECISION) == 0); Count++) {
-        ArgumentCharacter = ((ArgumentString[Count * BytesPerArgumentCharacter] & 0xff) | ((ArgumentString[Count * BytesPerArgumentCharacter + 1]) << 8)) & ArgumentMask;
+        ArgumentCharacter = NextCharacter(ArgumentString + (Count * BytesPerArgumentCharacter),
+                                          BytesPerArgumentCharacter) & ArgumentMask;
         if (ArgumentCharacter == 0) {
           break;
         }
@@ -1165,7 +1206,7 @@ BasePrintLibSPrintMarker (
     // Copy the string into the output buffer performing the required type conversions
     //
     while (Index < Count) {
-      ArgumentCharacter = ((*ArgumentString & 0xff) | (*(ArgumentString + 1) << 8)) & ArgumentMask;
+      ArgumentCharacter = NextCharacter(ArgumentString, BytesPerArgumentCharacter) & ArgumentMask;
 
       LengthToReturn += (1 * BytesPerOutputCharacter);
       if ((Flags & COUNT_ONLY_NO_PRINT) == 0 && Buffer != NULL) {
@@ -1206,7 +1247,7 @@ BasePrintLibSPrintMarker (
     //
     // Get the next character from the format string
     //
-    FormatCharacter = ((*Format & 0xff) | ((BytesPerFormatCharacter == 1) ? 0 : (*(Format + 1) << 8))) & FormatMask;
+    FormatCharacter = NextCharacter(Format, BytesPerFormatCharacter) & FormatMask;
   }
 
   if ((Flags & COUNT_ONLY_NO_PRINT) != 0) {

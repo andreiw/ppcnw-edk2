@@ -49,8 +49,8 @@
 [PcdsFixedAtBuild.common, PcdsDynamic.common, PcdsPatchableInModule.common]
 
 [PcdsFixedAtBuild.common, PcdsPatchableInModule.common]
-  gPPCTokenSpaceGuid.PcdFdBaseAddress|0|UINT64|0x00003001
-  gPPCTokenSpaceGuid.PcdFvBaseAddress|0|UINT64|0x00003002
+  gPPCTokenSpaceGuid.PcdFdBaseAddress|0|UINT32|0x00003001
+  gPPCTokenSpaceGuid.PcdFvBaseAddress|0|UINT32|0x00003002
 
 [PcdsFixedAtBuild.PPC]
 

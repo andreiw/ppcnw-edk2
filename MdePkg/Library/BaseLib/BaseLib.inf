@@ -66,6 +66,15 @@
   FilePaths.c
   BaseLibInternals.h
 
+[Sources.PPC]
+  PPC/CpuBreakpoint.S
+  PPC/CpuPause.S
+  PPC/SetJump.S
+  PPC/SwitchStack.S
+  Unaligned.c
+  Math64.c
+  PPC/qdivrem.c
+
 [Sources.Ia32]
   Ia32/Wbinvd.c | MSFT 
   Ia32/WriteMm7.c | MSFT 
