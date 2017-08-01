@@ -47,17 +47,14 @@
   gPPCTokenSpaceGuid.PcdFvSize|0|UINT32|0x00001002
 
 [PcdsFixedAtBuild.common, PcdsDynamic.common, PcdsPatchableInModule.common]
+  gPPCTokenSpaceGuid.PcdSystemMemoryBase|0|UINT32|0x00002001
+  gPPCTokenSpaceGuid.PcdSystemMemorySize|0|UINT32|0x00002002
 
 [PcdsFixedAtBuild.common, PcdsPatchableInModule.common]
   gPPCTokenSpaceGuid.PcdFdBaseAddress|0|UINT32|0x00003001
   gPPCTokenSpaceGuid.PcdFvBaseAddress|0|UINT32|0x00003002
+  gPPCTokenSpaceGuid.PcdFdLoaderExtraSize|0|UINT32|0x00003003
+  gPPCTokenSpaceGuid.PcdCPUCorePrimaryStackSize|0x10000|UINT32|0x00003004
 
 [PcdsFixedAtBuild.PPC]
 
-#
-# These PCDs are also defined as 'PcdsDynamic' or 'PcdsPatchableInModule' to be
-# redefined when using UEFI in a context of virtual machine.
-#
-[PcdsFixedAtBuild.common, PcdsDynamic.common, PcdsPatchableInModule.common]
-
-[PcdsFixedAtBuild.common, PcdsDynamic.common]

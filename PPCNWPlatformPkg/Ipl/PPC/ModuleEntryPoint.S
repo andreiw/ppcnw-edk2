@@ -10,36 +10,57 @@
 // WITHOUT WARRANTIES OR REPRESENTATIONS OF ANY KIND, EITHER EXPRESS OR IMPLIED.
 //
 
+#include <Library/PcdLib.h>
 #include <AsmMacroLib.h>
 #include <Pcr.h>
 
 .text
         .p2align 4
-stack:
-        .fill 4096
-stack_top:
 
-pcr:
-        .fill 4096
+#define STACK_FRAME_MIN 16
 
+local_vars:
+/* + 0: IplReservedBottom */
+        .long FixedPcdGet32(PcdFdBaseAddress)
+/* + 4: stack base */
+        .long FixedPcdGet32(PcdFdBaseAddress) + \
+              FixedPcdGet32(PcdFdSize)
+/* + 8: PCR base */
+        .long FixedPcdGet32(PcdFdBaseAddress) + \
+              FixedPcdGet32(PcdFdSize) + \
+              FixedPcdGet32(PcdCPUCorePrimaryStackSize)
+/* + 12: IplFreeMemoryBotom */
+        .long FixedPcdGet32(PcdFdBaseAddress) + \
+              FixedPcdGet32(PcdFdSize) + \
+              FixedPcdGet32(PcdCPUCorePrimaryStackSize) + \
+              PCR_Size
+/* +16: IplMemoryTop */
+        .long FixedPcdGet32(PcdFdBaseAddress) + \
+              FixedPcdGet32(PcdFdSize) + \
+              FixedPcdGet32(PcdFdLoaderExtraSize)
 //
 // Enter here with r5 = OF CIF entry.
 //
 ASM_FUNC(_ModuleEntryPoint)
-        //
-        // Setup stack.
-        //
+        mr      r31, r5
         bl      1f
-1:      mflr    r3
-        addi    r1, r3, (stack_top - 1b)
-        addi    r1,r1,-16
+1:      mflr    r30
+        addi    r29, r30, (local_vars - 1b)
+        lwz     r3, 0(r29) /* IplReservedBottom */
+        lwz     r4, 4(r29) /* stack base */
+        lwz     r2, 8(r29) /* PCR base */
+        subi    r1, r2, STACK_FRAME_MIN /* Stack top */
+        lwz     r5, 12(r29) /* IplFreeMemoryBottom */
+        lwz     r6, 16(r29) /* IplMemoryTop */
         //
-        // Setup PCR and save OF CIF.
+        // Save OF CIF in PCR.
         //
-        addi    r2, r3, (pcr - 1b)
-        stw     r5, PCR(OFEntry)
+        stw     r31, PCR(OFEntry)
         //
-        // Go C: r5 = OF CIF.
+        // Go C: r3 = IplReservedBottom
+        //       r4 = stack base
+        //       r5 = IplFreeMemoryBottom
+        //       r6 = IplMemoryTop
         //
         bl      CEntryPoint
         b       .

@@ -46,9 +46,5 @@
 #define r30 %r30
 #define r31 %r31
 
-#define LOAD_IMM(r, e) \
-  lis r,(e)@h;         \
-  ori r,r,(e)@l;
-
 #endif // __ASM_MACRO_LIB_H__
 

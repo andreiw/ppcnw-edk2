@@ -14,18 +14,21 @@
 
 [Defines]
   INF_VERSION                    = 0x00010005
-  BASE_NAME                      = OFWSerialPortLib
-  FILE_GUID                      = E9FA2D1E-05D9-421C-8C35-6100BB0093B7
+  BASE_NAME                      = PrePiHobListPointerLib
+  FILE_GUID                      = d751d880-5ee2-11e0-b93e-0002a5d5c51b
   MODULE_TYPE                    = BASE
   VERSION_STRING                 = 1.0
-  LIBRARY_CLASS                  = SerialPortLib
+  LIBRARY_CLASS                  = PrePiHobListPointerLib
 
-[Sources.common]
-  SerialPortLib.c
+[Sources]
+  PrePiHobListPointer.c
 
 [Packages]
   MdePkg/MdePkg.dec
+  PPCPkg/PPCPkg.dec
   PPCNWPlatformPkg/PPCNWPlatformPkg.dec
+  EmbeddedPkg/EmbeddedPkg.dec
 
 [LibraryClasses]
-  OFWLib
+
+[FixedPcd.common]

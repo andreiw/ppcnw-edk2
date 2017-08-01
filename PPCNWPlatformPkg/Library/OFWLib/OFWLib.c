@@ -25,11 +25,14 @@ VOID
 OFWIplInitialize(VOID)
 {
   OFW_PHANDLE Chosen;
+  OFW_PHANDLE Memory;
   OFW_IHANDLE Stdout;
   OFW_IHANDLE Screen;
 
   OFWCall("finddevice", 1, 1, "/chosen", &Chosen);
   PcrGet()->OFPChosen = (UINTN) Chosen;
+  OFWCall("finddevice", 1, 1, "/memory", &Memory);
+  PcrGet()->OFPMemory = (UINTN) Memory;
 
   Screen = (OFW_IHANDLE) -1;
   OFWCall("interpret", 1, 2,

@@ -23,3 +23,4 @@ important details.
 * [Part 4 - where we try to generate an EFI binary](PortingHowTo_p4.md)
 * [Part 5 - where we finally start writing the EFI boot code](PortingHowTo_p5.md)
 * [Part 6 - where we bring real logging to our IPL and fight endian-unsafe code](PortingHowTo_p6.md)
+* [Part 7 - where we being turning our IPL into a DXE loader](PortingHowTo_p7.md)

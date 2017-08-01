@@ -17,6 +17,7 @@
 typedef struct _PCR {
   UINT32 OFEntry;
   UINT32 OFPChosen;
+  UINT32 OFPMemory;
   UINT32 OFIStdout;
 } PCR;
 
@@ -29,7 +30,8 @@ PcrGet(void)
 #else
 #define PCR_OFEntry   0
 #define PCR_OFPChosen 4
-#define PCR_OFIStdout 8
+#define PCR_OFPMemory 8
+#define PCR_OFIStdout 12
 #define PCR_Size      0x1000
 #define PCR_R(name, reg) (PCR_ ## name)(reg)
 #define PCR(name) PCR_R(name, r2)

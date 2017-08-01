@@ -32,6 +32,7 @@
   Include                        # Root include for the package
 
 [LibraryClasses.common]
+  OFWLib|Include/Library/OFWLib.h
 
 [Guids.common]
   gPPCNWPlatformTokenSpaceGuid = { 0xAA11BBFE, 0x820F, 0x4968, { 0xBB, 0xA6, 0xF7, 0x6A, 0xFE, 0x30, 0x25, 0x16 } }
@@ -49,11 +50,3 @@
 [PcdsFixedAtBuild.common, PcdsPatchableInModule.common]
 
 [PcdsFixedAtBuild.PPC]
-
-#
-# These PCDs are also defined as 'PcdsDynamic' or 'PcdsPatchableInModule' to be
-# redefined when using UEFI in a context of virtual machine.
-#
-[PcdsFixedAtBuild.common, PcdsDynamic.common, PcdsPatchableInModule.common]
-
-[PcdsFixedAtBuild.common, PcdsDynamic.common]

@@ -25,7 +25,7 @@
 ################################################################################
 
 [FD.PPCNW]
-BaseAddress   = 0x00200000|gPPCTokenSpaceGuid.PcdFdBaseAddress
+BaseAddress   = 0x01000000|gPPCTokenSpaceGuid.PcdFdBaseAddress
 Size          = 0x00500000|gPPCTokenSpaceGuid.PcdFdSize
 ErasePolarity = 1
 

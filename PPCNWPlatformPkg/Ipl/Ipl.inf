@@ -1,7 +1,7 @@
-## @file
-#  Ipl for UEFI booted via NW OF.
 #
-#  Andrei Warkentin <andrey.warkentin@gmail.com>
+# PowerPC BE on NewWorld platforms, via OpenFirmware.
+#
+# Copyright (c) 2017, Andrei Warkentin <andrey.warkentin@gmail.com>
 #
 #  This program and the accompanying materials
 #  are licensed and made available under the terms and conditions of the BSD License
@@ -10,8 +10,7 @@
 #  THE PROGRAM IS DISTRIBUTED UNDER THE BSD LICENSE ON AN "AS IS" BASIS,
 #  WITHOUT WARRANTIES OR REPRESENTATIONS OF ANY KIND, EITHER EXPRESS OR IMPLIED.
 #
-#
-##
+
 
 [Defines]
   INF_VERSION                    = 0x00010005
@@ -37,12 +36,18 @@
   PPCNWPlatformPkg/PPCNWPlatformPkg.dec
   MdePkg/MdePkg.dec
   MdeModulePkg/MdeModulePkg.dec
+  EmbeddedPkg/EmbeddedPkg.dec
 
 [LibraryClasses]
   OFWLib
   SerialPortLib
   BaseLib
   PrintLib
+  HobLib
+
+[Pcd]
+  gPPCTokenSpaceGuid.PcdSystemMemoryBase
+  gPPCTokenSpaceGuid.PcdSystemMemorySize
 
 [FixedPcd]
   gEfiMdeModulePkgTokenSpaceGuid.PcdFirmwareVersionString
@@ -50,3 +55,7 @@
   gPPCTokenSpaceGuid.PcdFdSize
   gPPCTokenSpaceGuid.PcdFvBaseAddress
   gPPCTokenSpaceGuid.PcdFvSize
+  gPPCTokenSpaceGuid.PcdCPUCorePrimaryStackSize
+  gPPCTokenSpaceGuid.PcdFdLoaderExtraSize
+  gEmbeddedTokenSpaceGuid.PcdPrePiCpuMemorySize
+  gEmbeddedTokenSpaceGuid.PcdPrePiCpuIoSize

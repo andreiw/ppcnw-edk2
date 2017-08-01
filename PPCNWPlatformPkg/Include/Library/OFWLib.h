@@ -48,4 +48,24 @@ OFWGetProp(IN  OFW_PHANDLE Node,
   return TRUE;
 }
 
+STATIC inline BOOLEAN
+OFWGetPropLen(IN  OFW_PHANDLE Node,
+              IN  CHAR8 *Name,
+              OUT UINT32 *Length)
+{
+  OFW_RETVAL CallRet;
+  OFW_RETVAL CIFRet = OFWCall("getproplen", 2, 1, Node,
+                              Name, &CallRet);
+  if (CIFRet != 0) {
+    return FALSE;
+  }
+
+  if (CallRet == -1) {
+    return FALSE;
+  }
+
+  *Length = CallRet;
+  return TRUE;
+}
+
 #endif /* __OFW_LIB_H__ */

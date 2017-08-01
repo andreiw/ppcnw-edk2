@@ -22,29 +22,30 @@ ASM_FUNC(_ModuleEntryPoint)
          *
          * Who needs linkers anyway?
          */
-start:  .byte 0x7F, 'E', 'L', 'F', 1, 2, 1, 0  /* e_ident */
+start:  .byte 0x7F, 'E', 'L', 'F', 1, 2, 1, 0      /* e_ident */
         .byte 0, 0, 0, 0, 0, 0, 0, 0
-        .word 2                                /* e_type */
-        .word 20                               /* e_machine */
-        .long 1                                /* e_version */
+        .word 2                                    /* e_type */
+        .word 20                                   /* e_machine */
+        .long 1                                    /* e_version */
         .long FixedPcdGet32(PcdFdBaseAddress) + code - start /* e_entry */
-        .long phdr - start                     /* e_phoff */
-        .long 0                                /* e_shoff */
-        .long 0                                /* e_flags */
-        .word phdr - start                     /* e_ehsize */
-        .word code - phdr                      /* e_phentsize */
-        .word 1                                /* e_phnum */
-        .word 0                                /* e_shentsize */
-        .word 0                                /* e_shnum */
-        .word 0                                /* e_shstrndx */
-phdr:   .long 1                                /* e_ptype */
-        .long 0                                /* p_offset */
-        .long FixedPcdGet32(PcdFdBaseAddress)  /* p_vaddr */
-        .long FixedPcdGet32(PcdFdBaseAddress)  /* p_paddr */
-        .long FixedPcdGet32(PcdFdSize)         /* p_filesz */
-        .long FixedPcdGet32(PcdFdSize)         /* p_memsz */
-        .long 7                                /* p_flags */
-        .long 0x1000                           /* p_align */
+        .long phdr - start                         /* e_phoff */
+        .long 0                                    /* e_shoff */
+        .long 0                                    /* e_flags */
+        .word phdr - start                         /* e_ehsize */
+        .word code - phdr                          /* e_phentsize */
+        .word 1                                    /* e_phnum */
+        .word 0                                    /* e_shentsize */
+        .word 0                                    /* e_shnum */
+        .word 0                                    /* e_shstrndx */
+phdr:   .long 1                                    /* e_ptype */
+        .long 0                                    /* p_offset */
+        .long FixedPcdGet32(PcdFdBaseAddress)      /* p_vaddr */
+        .long FixedPcdGet32(PcdFdBaseAddress)      /* p_paddr */
+        .long FixedPcdGet32(PcdFdSize)             /* p_filesz */
+        .long (FixedPcdGet32(PcdFdSize) + \
+               FixedPcdGet32(PcdFdLoaderExtraSize)) /* p_memsz */
+        .long 7                                    /* p_flags */
+        .long 0x1000                               /* p_align */
 code:   
         /*
          * This fussy nonsense jumps through an entry point

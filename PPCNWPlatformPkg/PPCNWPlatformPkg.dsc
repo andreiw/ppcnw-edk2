@@ -1,5 +1,5 @@
-#/** @file
-# PowerPC NewWorld Mac support
+#
+# PowerPC BE on NewWorld platforms.
 #
 # Copyright (c) 2017, Andrei Warkentin <andrey.warkentin@gmail.com>
 #
@@ -11,7 +11,7 @@
 #    THE PROGRAM IS DISTRIBUTED UNDER THE BSD LICENSE ON AN "AS IS" BASIS,
 #    WITHOUT WARRANTIES OR REPRESENTATIONS OF ANY KIND, EITHER EXPRESS OR IMPLIED.
 #
-#**/
+#
 
 ################################################################################
 #
@@ -51,8 +51,15 @@
 [LibraryClasses.common.DXE_CORE]
 
 [LibraryClasses.common.SEC]
+   PrePiLib|EmbeddedPkg/Library/PrePiLib/PrePiLib.inf
+   HobLib|EmbeddedPkg/Library/PrePiHobLib/PrePiHobLib.inf
+   PrePiHobListPointerLib|PPCNWPlatformPkg/Library/PrePiHobListPointerLib/PrePiHobListPointerLib.inf
 
 [PcdsFixedAtBuild.common]
+  #
+  # Accomodate the IPL stack, PCR and PHIT allocations.
+  #
+  gPPCTokenSpaceGuid.PcdFdLoaderExtraSize|0x400000
   gEfiMdeModulePkgTokenSpaceGuid.PcdFirmwareVersionString|L"PPC32BE Prototype"
 
   # DEBUG_ASSERT_ENABLED       0x01
@@ -88,6 +95,10 @@
   #                              // significantly impact boot performance
   #  DEBUG_ERROR     0x80000000  // Error
   gEfiMdePkgTokenSpaceGuid.PcdDebugPrintErrorLevel|0x8000004F
+
+[PcdsPatchableInModule.common]
+  gPPCTokenSpaceGuid.PcdSystemMemoryBase|0x0
+  gPPCTokenSpaceGuid.PcdSystemMemorySize|0x0
 
 [Components.common]
   PPCPkg/FDLoader/FDLoader.inf

@@ -49,6 +49,7 @@
   gPPCTokenSpaceGuid.PcdFdBaseAddress
   gPPCTokenSpaceGuid.PcdFvBaseAddress
   gPPCTokenSpaceGuid.PcdFdSize
+  gPPCTokenSpaceGuid.PcdFdLoaderExtraSize
 
 [BuildOptions]
   GCC:*_*_*_GENFW_FLAGS = --exe2bin
